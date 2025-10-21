@@ -42,6 +42,10 @@ def carregar_dados():
 
 # === SALVAR TRATATIVA ===
 def salvar_tratativa(df, id_linha, tratativa):
+    def normalizar_id(valor):
+        """Remove espaços e .0 para garantir correspondência correta"""
+        return str(valor).strip().replace(".0", "")
+
     aba = conectar_planilha()
     linhas = aba.get_all_values()
     header = linhas[0]
@@ -49,12 +53,13 @@ def salvar_tratativa(df, id_linha, tratativa):
     idx_id = header.index("ID")
 
     for i, row in enumerate(linhas[1:], start=2):
-        if str(row[idx_id]) == str(id_linha):
+        if normalizar_id(row[idx_id]) == normalizar_id(id_linha):
             valor = "" if tratativa == "Nenhuma" else tratativa
             aba.update_cell(i, idx_tratativa + 1, valor)
             st.success(f"✅ Tratativa atualizada para '{valor or 'Nenhuma'}'")
             return
-    st.warning("⚠️ Registro não encontrado!")
+
+    st.warning("⚠️ Registro não encontrado! Verifique se o ID existe na planilha.")
 
 # === INTERFACE STREAMLIT ===
 st.set_page_config(page_title="Tratativas Comerciais", layout="wide")
