@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "projeto-ruptura",
+  "private_key_id": "33518d57fb06d0a151d8ec153ab27384bee69e9a",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCWeZ7Kz4mJwtZZ\ndpVPpTq7MvV6tbIgq1AlQwmWe2Bkp1E8GG20LX1B55vmrDyNvWFZUCq42o9OVrns\n2kIT3O2jUG/zGP5Pnaj5k8bWRxzAtqG1S/jxTSyo2tHwGtR4S/o71l/NDa+6+ql/\nd9tzmouCh30vjBjJmjQrsNyEPfACvUJRlWQbr4ajLwjZkootWwzcThiH5mR/6ICi\nAAtJZ69DKJXex5gcs40THSvqrQZBXn2ssCtr1NSHjgfHzNlnVggi1GbhelQ0UD8E\nyCAeJ7kqFI1Dxy3wYKFywblL5m2Ptd+vyRj+aLU7d+dpA6DuSufghIXGysyWBwU9\nizyDInqBAgMBAAECggEARmc683ssx8bgUVVZQL13ADU0g6hVYlGlGvoFl2G8VPuv\n12U6ls2dyGMcH05AurR7wrTueDTSTf3n2bi4p+B7UykEaAIuooOKltMceg8llckd\nWdzk6cmI9qwDA8sZ0/sAZlTD2AXqTZqQCXLDu4/4bCcGXGO5CUJb3IFQe5MbI7w/\nVGcbfP8312sxN+7bAZafs+Px0SVaZFsCDOXNNPEKgVYYvOTcxXsVqDKp8EUgPX6t\nRkpiycotqvbXnfujDeAlVBBNBcYRr6P/yBy7I7331j1zJhOFMNtb/yndxa9+GMMy\nolnCNNnoEcRR/uyOD1mnU3FlLY/abEEJVbVxg8s53QKBgQDOI7CmTP2OA4ysiYDd\nRboeMjZh1WgfBhfyWVbsCyvw7LiSbuPj6uvQGs/yP0Uv1PHZty2UyY74DIHkvz8s\nNqWdk5JlnTnDvzWlc7cDHwfhCZlqd1tg4xYGe2Bn2qh7gkAnvXh9dswFPwG+BUsb\n2x6Xdxj0CFxLxyKBmUuf8L2rRwKBgQC63ybwrywoVxMFzRvYQ8+kOvkEeWClMG76\nzXmXYGDETczCiIwAlVUzEe4MK0RvL2UpbpRJihQKPUdO92T76lLVI5HG+XiUwEvJ\noUJgqOwAZl3adbzuwMLyTq9Yxr+YonEwrsLhsCtx1PfnhgvqlstyBfrL6zkLtwto\nDygzG4Z/9wKBgCkx9rZ1QmKkEPPWEtuleJlaPYX1qPYyOIzlD7riTKi8FfKlmINO\nyktvYEkwHbp+WsrAkapfUWP+0+KL2asTTKud9y65afbVenoTEurbw65URcWCDs/g\n8eDfvRdkGjF8iSen9LFWEVWnDskTs7vgYU+xrFnwZcl7BUlTAkr3SGA3AoGAGmAY\nvOvcja0MkEsM3Q9lJUb1kr4W9/nIEDokKUt/HPXmKqbfK83oApdLRAhvVkoYOyrS\nXzbP8UoI4IpmhG/kVRT6JF1duZESoVjTZ5UwCjZolMb9ba1jVpPoh901ebOjyj1A\nYF5fI2ftvY3b7LZv7J4Pcey3VoH1aDCLefsulq0CgYBll0Oc9r2UK1SsUIitOlkI\nOzHV2FcunjAzyrou5INURQoxYJgm8UiKzG2UWoc9au9KKik73N8N/p0GunhouVp3\nuHik2HkEpg99EN/CKF91UFP/lYZSEstAwhob6BurSl80Tyzh0iy/0efh1OWGlCAf\nWdoOdYmuoVxnwkNiyVBjrQ==\n-----END PRIVATE KEY-----\n",
+  "client_email": "eder-analista@projeto-ruptura.iam.gserviceaccount.com",
+  "client_id": "110000067659778025961",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/eder-analista%40projeto-ruptura.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
