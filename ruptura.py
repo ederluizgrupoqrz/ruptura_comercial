@@ -130,6 +130,7 @@ for _, row in dados_exibir.iterrows():
             <b>🏬 Loja:</b> {loja}<br>
             <b>🧾 Produto:</b> {produto}<br>
             <b>🔢 Código:</b> {codigo or '-'}<br>
+            <b>🔢 ID:</b> {id_linha or '-'}<br>
             <b>⏱ Tempo de ruptura:</b> {tempo or '-'}<br>
             <b>🕒 Data/Hora:</b> {datahora or '-'}<br>
             </div>
@@ -151,3 +152,4 @@ for _, row in dados_exibir.iterrows():
 
 st.sidebar.markdown("---")
 st.sidebar.info("📌 Dica: Use 'Nenhuma' para remover uma tratativa e voltar o item para pendentes.")
+
