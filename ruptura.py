@@ -5,7 +5,6 @@ from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 import re
 
-
 # === CONFIGURAÇÕES ===
 SHEET_ID = "1Ss4PCyVcDiXMDRglyg6u7Vqux0gJ_amZn06GdVh7PQo"
 SHEET_NAME = "RUPTURAS LOJAS"
@@ -49,12 +48,12 @@ def salvar_tratativa(df, id_linha, tratativa):
     header = linhas[0]
 
     # garante que temos as colunas certas
-    if "Tratativa Comercial" not in header or "ID" not in header:
-        st.error("Colunas 'ID' ou 'Tratativa Comercial' não encontradas na planilha.")
+    if "Tratativa Comercial" not in header or "IDOK" not in header:
+        st.error("Colunas 'IDOK' ou 'Tratativa Comercial' não encontradas na planilha.")
         return
 
     idx_tratativa = header.index("Tratativa Comercial")
-    idx_id = header.index("ID")
+    idx_id = header.index("IDOK")
 
     # converte o ID do formulário e da planilha em string (texto puro)
     id_alvo = str(id_linha).strip()
@@ -120,7 +119,7 @@ dados_exibir = pendentes if "sem" in opcao else tratados
 st.subheader(opcao)
 
 for _, row in dados_exibir.iterrows():
-    id_linha = row["ID"]
+    id_linha = str(row["IDOK"]).strip()
     loja = row["Informe a loja da ruptura"]
     produto = row["Informe o produto em ruptura"]
     codigo = row.get("Informe o código do produto em ruptura", "")
@@ -160,4 +159,3 @@ for _, row in dados_exibir.iterrows():
 
 st.sidebar.markdown("---")
 st.sidebar.info("📌 Dica: Use 'Nenhuma' para remover uma tratativa e voltar o item para pendentes.")
-
