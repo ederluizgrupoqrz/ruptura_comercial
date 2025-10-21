@@ -3,6 +3,8 @@ import pandas as pd
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
+import re
+
 
 # === CONFIGURAÇÕES ===
 SHEET_ID = "1Ss4PCyVcDiXMDRglyg6u7Vqux0gJ_amZn06GdVh7PQo"
@@ -40,26 +42,45 @@ def carregar_dados():
     dados = aba.get_all_records()
     return pd.DataFrame(dados)
 
-# === SALVAR TRATATIVA ===
 def salvar_tratativa(df, id_linha, tratativa):
     def normalizar_id(valor):
-        """Remove espaços e .0 para garantir correspondência correta"""
-        return str(valor).strip().replace(".0", "")
+        """Tenta extrair o ID real de várias formas:
+           - remove prefixos tipo 'ID:' e espaços
+           - se for float com ponto (ex: '1.49') remove o ponto (-> '149')
+           - como fallback, extrai apenas dígitos consecutivos
+        """
+        if valor is None:
+            return ""
+        s = str(valor).strip()
+        # remove prefixo 'ID:' se existir
+        s = re.sub(r'(?i)^id[:\s]*', '', s).strip()
+        # se for algo do tipo '1.49' (somente dígitos e um ponto), remove o ponto
+        if re.match(r'^\d+\.\d+$', s):
+            return s.replace('.', '')
+        # extrai todos os dígitos e concatena (por segurança)
+        digits = re.findall(r'\d+', s)
+        return ''.join(digits)
 
     aba = conectar_planilha()
     linhas = aba.get_all_values()
     header = linhas[0]
-    idx_tratativa = header.index("Tratativa Comercial")
-    idx_id = header.index("ID")
+    try:
+        idx_tratativa = header.index("Tratativa Comercial")
+        idx_id = header.index("ID")
+    except ValueError as e:
+        st.error("Coluna 'ID' ou 'Tratativa Comercial' não encontrada na planilha.")
+        return
+
+    alvo = normalizar_id(id_linha)
 
     for i, row in enumerate(linhas[1:], start=2):
-        if normalizar_id(row[idx_id]) == normalizar_id(id_linha):
+        if normalizar_id(row[idx_id]) == alvo:
             valor = "" if tratativa == "Nenhuma" else tratativa
             aba.update_cell(i, idx_tratativa + 1, valor)
             st.success(f"✅ Tratativa atualizada para '{valor or 'Nenhuma'}'")
             return
 
-    st.warning("⚠️ Registro não encontrado! Verifique se o ID existe na planilha.")
+    st.warning("⚠️ Registro não encontrado! Verifique se o ID existe na planilha e se a coluna 'ID' está formatada corretamente.")
 
 # === INTERFACE STREAMLIT ===
 st.set_page_config(page_title="Tratativas Comerciais", layout="wide")
@@ -130,7 +151,6 @@ for _, row in dados_exibir.iterrows():
             <b>🏬 Loja:</b> {loja}<br>
             <b>🧾 Produto:</b> {produto}<br>
             <b>🔢 Código:</b> {codigo or '-'}<br>
-            <b>🔢 ID:</b> {id_linha or '-'}<br>
             <b>⏱ Tempo de ruptura:</b> {tempo or '-'}<br>
             <b>🕒 Data/Hora:</b> {datahora or '-'}<br>
             </div>
@@ -152,4 +172,3 @@ for _, row in dados_exibir.iterrows():
 
 st.sidebar.markdown("---")
 st.sidebar.info("📌 Dica: Use 'Nenhuma' para remover uma tratativa e voltar o item para pendentes.")
-
