@@ -11,7 +11,7 @@ SHEET_NAME = "RUPTURAS LOJAS"
 LOGO_PATH = "qrz_grupo_queiroz_logo.png"
 
 TRATATIVAS = [
-    "Nenhuma",  # para permitir remover a tratativa
+    "Nenhuma",
     "Problema no Agendamento",
     "Ruptura da Industria",
     "Será feito pedido",
@@ -47,15 +47,12 @@ def salvar_tratativa(df, id_linha, tratativa):
     linhas = aba.get_all_values()
     header = linhas[0]
 
-    # garante que temos as colunas certas
     if "Tratativa Comercial" not in header or "IDOK" not in header:
         st.error("Colunas 'IDOK' ou 'Tratativa Comercial' não encontradas na planilha.")
         return
 
     idx_tratativa = header.index("Tratativa Comercial")
     idx_id = header.index("IDOK")
-
-    # converte o ID do formulário e da planilha em string (texto puro)
     id_alvo = str(id_linha).strip()
 
     for i, row in enumerate(linhas[1:], start=2):
@@ -71,12 +68,49 @@ def salvar_tratativa(df, id_linha, tratativa):
 # === INTERFACE STREAMLIT ===
 st.set_page_config(page_title="Tratativas Comerciais", layout="wide")
 
+# === CSS PARA TEMA CLARO/ESCURO ===
+st.markdown("""
+<style>
+/* Detecta o tema do sistema */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-color: #121212;
+        --text-color: #f5f5f5;
+        --card-pendente: #3a1f1f;
+        --card-tratado: #1f3a2a;
+    }
+}
+@media (prefers-color-scheme: light) {
+    :root {
+        --bg-color: #ffffff;
+        --text-color: #000000;
+        --card-pendente: #FDECEA;
+        --card-tratado: #E8F5E9;
+    }
+}
+
+/* Aplica as cores */
+body, .stApp {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+div[data-testid="stSidebar"] {
+    background-color: var(--bg-color) !important;
+}
+
+h1, h2, h3, h4, h5, h6, p, label, span {
+    color: var(--text-color) !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 # === CABEÇALHO COM LOGO ===
 col1, col2 = st.columns([1, 5])
 with col1:
     st.image(LOGO_PATH, width=220)
 with col2:
-    st.title(" Sistema de Tratativas Comerciais")
+    st.title("Sistema de Tratativas Comerciais")
 
 df = carregar_dados()
 
@@ -115,7 +149,6 @@ if st.sidebar.button("🔄 Atualizar dados"):
 
 # === EXIBIR PRODUTOS ===
 dados_exibir = pendentes if "sem" in opcao else tratados
-
 st.subheader(opcao)
 
 for _, row in dados_exibir.iterrows():
@@ -127,13 +160,13 @@ for _, row in dados_exibir.iterrows():
     datahora = row.get("Carimbo de data/hora", "")
     tratativa_atual = row.get("Tratativa Comercial", "")
 
-    # cor de fundo
-    cor = "#FDECEA" if tratativa_atual == "" else "#E8F5E9"
+    # Cores adaptadas ao tema
+    cor_var = "var(--card-pendente)" if tratativa_atual == "" else "var(--card-tratado)"
 
     with st.container():
         st.markdown(
             f"""
-            <div style='background-color:{cor}; padding:15px; border-radius:10px; margin-bottom:10px'>
+            <div style='background-color:{cor_var}; padding:15px; border-radius:10px; margin-bottom:10px'>
             <b>🏬 Loja:</b> {loja}<br>
             <b>🧾 Produto:</b> {produto}<br>
             <b>🧾 ID:</b> {id_linha}<br>
