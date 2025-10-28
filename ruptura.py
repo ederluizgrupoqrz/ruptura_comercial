@@ -11,7 +11,7 @@ SHEET_NAME = "RUPTURAS LOJAS"
 LOGO_PATH = "qrz_grupo_queiroz_logo.png"
 
 TRATATIVAS = [
-    "Nenhuma",
+    "Nenhuma",  # para permitir remover a tratativa
     "Problema no Agendamento",
     "Ruptura da Industria",
     "Será feito pedido",
@@ -24,6 +24,36 @@ TRATATIVAS = [
     "Saiu do Mix da Loja",
     "Indeferido"
 ]
+
+# === CSS PARA TEMA ESCURO / CLARO ===
+st.markdown("""
+<style>
+[data-testid="stSidebar"] {
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+:root {
+    --background-color: white;
+    --text-color: black;
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background-color: #0E1117;
+        --text-color: white;
+    }
+    [data-testid="stSidebar"], [data-testid="stAppViewContainer"] {
+        background-color: #0E1117 !important;
+        color: white !important;
+    }
+    h1, h2, h3, h4, h5, h6, p, label, div, span {
+        color: white !important;
+    }
+    .stSelectbox, .stButton, .stRadio, .stDateInput {
+        color: white !important;
+    }
+}
+</style>
+""", unsafe_allow_html=True)
 
 # === CONECTAR AO GOOGLE SHEETS ===
 def conectar_planilha():
@@ -39,16 +69,7 @@ def conectar_planilha():
 def carregar_dados():
     aba = conectar_planilha()
     dados = aba.get_all_records()
-    df = pd.DataFrame(dados)
-
-    # Converter a coluna de data/hora do formulário para datetime
-    if "Carimbo de data/hora" in df.columns:
-        df["Data"] = df["Carimbo de data/hora"].apply(lambda x: str(x).split(" ")[0])  # extrai apenas a data
-        try:
-            df["Data"] = pd.to_datetime(df["Data"], format="%d/%m/%Y").dt.date
-        except Exception:
-            df["Data"] = pd.NaT
-    return df
+    return pd.DataFrame(dados)
 
 # === SALVAR TRATATIVA ===
 def salvar_tratativa(df, id_linha, tratativa):
@@ -77,69 +98,6 @@ def salvar_tratativa(df, id_linha, tratativa):
 # === INTERFACE STREAMLIT ===
 st.set_page_config(page_title="Tratativas Comerciais", layout="wide")
 
-# === CSS PARA TEMA CLARO/ESCURO ===
-st.markdown("""
-<style>
-@media (prefers-color-scheme: dark) {
-    :root {
-        --bg-color: #121212;
-        --text-color: #f5f5f5;
-        --sidebar-bg: #1c1c1c;
-        --input-bg: #2a2a2a;
-        --card-pendente: #3a1f1f;
-        --card-tratado: #1f3a2a;
-    }
-
-    body, .stApp {
-        background-color: var(--bg-color);
-        color: var(--text-color);
-    }
-
-    div[data-testid="stSidebar"] {
-        background-color: var(--sidebar-bg) !important;
-        color: var(--text-color) !important;
-    }
-
-    h1, h2, h3, h4, h5, h6, p, label, span, div, button, input, select {
-        color: var(--text-color) !important;
-    }
-
-    .stSelectbox, .stTextInput, .stRadio, .stDateInput, .stButton > button {
-        background-color: var(--input-bg) !important;
-        color: var(--text-color) !important;
-        border: 1px solid #333 !important;
-    }
-
-    .stButton > button {
-        background-color: #333 !important;
-        color: var(--text-color) !important;
-        border-radius: 8px;
-    }
-}
-
-@media (prefers-color-scheme: light) {
-    :root {
-        --bg-color: #ffffff;
-        --text-color: #000000;
-        --sidebar-bg: #f0f2f6;
-        --input-bg: #ffffff;
-        --card-pendente: #FDECEA;
-        --card-tratado: #E8F5E9;
-    }
-
-    body, .stApp {
-        background-color: var(--bg-color);
-        color: var(--text-color);
-    }
-
-    div[data-testid="stSidebar"] {
-        background-color: var(--sidebar-bg) !important;
-        color: var(--text-color) !important;
-    }
-}
-</style>
-""", unsafe_allow_html=True)
-
 # === CABEÇALHO ===
 col1, col2 = st.columns([1, 5])
 with col1:
@@ -148,34 +106,48 @@ with col2:
     st.title("Sistema de Tratativas Comerciais")
 
 df = carregar_dados()
+
 if df.empty:
     st.error("Nenhum dado encontrado na planilha.")
     st.stop()
 
 # === MENU LATERAL ===
 st.sidebar.header("Menu Principal")
-
-# Filtro comprador
 compradores = sorted(df["Comprador"].dropna().unique())
 comprador = st.sidebar.selectbox("👤 Selecione o comprador:", compradores)
 
+# === FILTRO DE DATA ===
+st.sidebar.markdown("### 📅 Filtro de Data")
+
+# Converte a coluna de data
+df["Carimbo de data/hora"] = pd.to_datetime(df["Carimbo de data/hora"], errors="coerce", format="%d/%m/%Y %H:%M:%S")
+
+data_min = df["Carimbo de data/hora"].min().date() if not df.empty else datetime.today().date()
+data_max = df["Carimbo de data/hora"].max().date() if not df.empty else datetime.today().date()
+
+col_data1, col_data2 = st.sidebar.columns(2)
+data_inicio = col_data1.date_input("Início", data_min)
+data_fim = col_data2.date_input("Fim", data_max)
+
+if data_inicio > data_fim:
+    st.sidebar.error("⚠️ A data inicial não pode ser maior que a final.")
+    st.stop()
+
+# === BOTÃO DE ATUALIZAR ===
+if st.sidebar.button("🔄 Atualizar dados"):
+    st.cache_data.clear()
+    st.rerun()
+
+# === FILTROS PRINCIPAIS ===
 if not comprador:
     st.info("Selecione um comprador no menu lateral.")
     st.stop()
 
-# Filtro de data
-datas_disponiveis = sorted(df["Data"].dropna().unique())
-data_selecionada = st.sidebar.date_input("📅 Filtrar por data:", value=None, min_value=min(datas_disponiveis), max_value=max(datas_disponiveis))
-
-# === FILTRAR DADOS ===
-dados_filtrados = df[df["Comprador"] == comprador]
-
-if data_selecionada:
-    dados_filtrados = dados_filtrados[dados_filtrados["Data"] == data_selecionada]
-
-if dados_filtrados.empty:
-    st.warning("Nenhum registro encontrado para os filtros selecionados.")
-    st.stop()
+dados_filtrados = df[
+    (df["Comprador"] == comprador) &
+    (df["Carimbo de data/hora"].dt.date >= data_inicio) &
+    (df["Carimbo de data/hora"].dt.date <= data_fim)
+]
 
 # === CONTADORES ===
 pendentes = dados_filtrados[dados_filtrados["Tratativa Comercial"] == ""]
@@ -189,11 +161,7 @@ opcao = st.sidebar.radio(
     )
 )
 
-if st.sidebar.button("🔄 Atualizar dados"):
-    st.cache_data.clear()
-    st.rerun()
-
-# === EXIBIÇÃO ===
+# === EXIBIR PRODUTOS ===
 dados_exibir = pendentes if "sem" in opcao else tratados
 st.subheader(opcao)
 
@@ -206,12 +174,12 @@ for _, row in dados_exibir.iterrows():
     datahora = row.get("Carimbo de data/hora", "")
     tratativa_atual = row.get("Tratativa Comercial", "")
 
-    cor_var = "var(--card-pendente)" if tratativa_atual == "" else "var(--card-tratado)"
+    cor = "#FDECEA" if tratativa_atual == "" else "#E8F5E9"
 
     with st.container():
         st.markdown(
             f"""
-            <div style='background-color:{cor_var}; padding:15px; border-radius:10px; margin-bottom:10px'>
+            <div style='background-color:{cor}; padding:15px; border-radius:10px; margin-bottom:10px'>
             <b>🏬 Loja:</b> {loja}<br>
             <b>🧾 Produto:</b> {produto}<br>
             <b>🧾 ID:</b> {id_linha}<br>
