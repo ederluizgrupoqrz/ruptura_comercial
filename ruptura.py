@@ -174,7 +174,7 @@ for _, row in dados_exibir.iterrows():
     datahora = row.get("Carimbo de data/hora", "")
     tratativa_atual = row.get("Tratativa Comercial", "")
 
-    cor = "#FDECEA" if tratativa_atual == "" else "#E8F5E9"
+    cor = "#fa9387" if tratativa_atual == "" else "#79f783"
 
     with st.container():
         st.markdown(
@@ -205,3 +205,4 @@ for _, row in dados_exibir.iterrows():
 
 st.sidebar.markdown("---")
 st.sidebar.info("📌 Dica: Use 'Nenhuma' para remover uma tratativa e voltar o item para pendentes.")
+
