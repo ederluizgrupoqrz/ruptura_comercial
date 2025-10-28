@@ -39,7 +39,16 @@ def conectar_planilha():
 def carregar_dados():
     aba = conectar_planilha()
     dados = aba.get_all_records()
-    return pd.DataFrame(dados)
+    df = pd.DataFrame(dados)
+
+    # Converter a coluna de data/hora do formulário para datetime
+    if "Carimbo de data/hora" in df.columns:
+        df["Data"] = df["Carimbo de data/hora"].apply(lambda x: str(x).split(" ")[0])  # extrai apenas a data
+        try:
+            df["Data"] = pd.to_datetime(df["Data"], format="%d/%m/%Y").dt.date
+        except Exception:
+            df["Data"] = pd.NaT
+    return df
 
 # === SALVAR TRATATIVA ===
 def salvar_tratativa(df, id_linha, tratativa):
@@ -68,10 +77,9 @@ def salvar_tratativa(df, id_linha, tratativa):
 # === INTERFACE STREAMLIT ===
 st.set_page_config(page_title="Tratativas Comerciais", layout="wide")
 
-# === CSS PARA TEMA CLARO/ESCURO (corrigido) ===
+# === CSS PARA TEMA CLARO/ESCURO ===
 st.markdown("""
 <style>
-/* TEMA ESCURO */
 @media (prefers-color-scheme: dark) {
     :root {
         --bg-color: #121212;
@@ -87,25 +95,21 @@ st.markdown("""
         color: var(--text-color);
     }
 
-    /* Sidebar */
     div[data-testid="stSidebar"] {
         background-color: var(--sidebar-bg) !important;
         color: var(--text-color) !important;
     }
 
-    /* Textos */
     h1, h2, h3, h4, h5, h6, p, label, span, div, button, input, select {
         color: var(--text-color) !important;
     }
 
-    /* Campos de entrada e selects */
-    .stSelectbox, .stTextInput, .stRadio, .stButton > button {
+    .stSelectbox, .stTextInput, .stRadio, .stDateInput, .stButton > button {
         background-color: var(--input-bg) !important;
         color: var(--text-color) !important;
         border: 1px solid #333 !important;
     }
 
-    /* Botões */
     .stButton > button {
         background-color: #333 !important;
         color: var(--text-color) !important;
@@ -113,7 +117,6 @@ st.markdown("""
     }
 }
 
-/* TEMA CLARO */
 @media (prefers-color-scheme: light) {
     :root {
         --bg-color: #ffffff;
@@ -137,7 +140,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# === CABEÇALHO COM LOGO ===
+# === CABEÇALHO ===
 col1, col2 = st.columns([1, 5])
 with col1:
     st.image(LOGO_PATH, width=220)
@@ -145,13 +148,14 @@ with col2:
     st.title("Sistema de Tratativas Comerciais")
 
 df = carregar_dados()
-
 if df.empty:
     st.error("Nenhum dado encontrado na planilha.")
     st.stop()
 
-# === MENU PRINCIPAL ===
+# === MENU LATERAL ===
 st.sidebar.header("Menu Principal")
+
+# Filtro comprador
 compradores = sorted(df["Comprador"].dropna().unique())
 comprador = st.sidebar.selectbox("👤 Selecione o comprador:", compradores)
 
@@ -159,12 +163,23 @@ if not comprador:
     st.info("Selecione um comprador no menu lateral.")
     st.stop()
 
-# === FILTRAR POR COMPRADOR ===
-dados_comprador = df[df["Comprador"] == comprador]
+# Filtro de data
+datas_disponiveis = sorted(df["Data"].dropna().unique())
+data_selecionada = st.sidebar.date_input("📅 Filtrar por data:", value=None, min_value=min(datas_disponiveis), max_value=max(datas_disponiveis))
+
+# === FILTRAR DADOS ===
+dados_filtrados = df[df["Comprador"] == comprador]
+
+if data_selecionada:
+    dados_filtrados = dados_filtrados[dados_filtrados["Data"] == data_selecionada]
+
+if dados_filtrados.empty:
+    st.warning("Nenhum registro encontrado para os filtros selecionados.")
+    st.stop()
 
 # === CONTADORES ===
-pendentes = dados_comprador[dados_comprador["Tratativa Comercial"] == ""]
-tratados = dados_comprador[dados_comprador["Tratativa Comercial"] != ""]
+pendentes = dados_filtrados[dados_filtrados["Tratativa Comercial"] == ""]
+tratados = dados_filtrados[dados_filtrados["Tratativa Comercial"] != ""]
 
 opcao = st.sidebar.radio(
     "Escolha a visualização:",
@@ -174,12 +189,11 @@ opcao = st.sidebar.radio(
     )
 )
 
-# === BOTÃO DE ATUALIZAR ===
 if st.sidebar.button("🔄 Atualizar dados"):
     st.cache_data.clear()
     st.rerun()
 
-# === EXIBIR PRODUTOS ===
+# === EXIBIÇÃO ===
 dados_exibir = pendentes if "sem" in opcao else tratados
 st.subheader(opcao)
 
