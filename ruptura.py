@@ -68,39 +68,71 @@ def salvar_tratativa(df, id_linha, tratativa):
 # === INTERFACE STREAMLIT ===
 st.set_page_config(page_title="Tratativas Comerciais", layout="wide")
 
-# === CSS PARA TEMA CLARO/ESCURO ===
+# === CSS PARA TEMA CLARO/ESCURO (corrigido) ===
 st.markdown("""
 <style>
-/* Detecta o tema do sistema */
+/* TEMA ESCURO */
 @media (prefers-color-scheme: dark) {
     :root {
         --bg-color: #121212;
         --text-color: #f5f5f5;
+        --sidebar-bg: #1c1c1c;
+        --input-bg: #2a2a2a;
         --card-pendente: #3a1f1f;
         --card-tratado: #1f3a2a;
     }
+
+    body, .stApp {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+    }
+
+    /* Sidebar */
+    div[data-testid="stSidebar"] {
+        background-color: var(--sidebar-bg) !important;
+        color: var(--text-color) !important;
+    }
+
+    /* Textos */
+    h1, h2, h3, h4, h5, h6, p, label, span, div, button, input, select {
+        color: var(--text-color) !important;
+    }
+
+    /* Campos de entrada e selects */
+    .stSelectbox, .stTextInput, .stRadio, .stButton > button {
+        background-color: var(--input-bg) !important;
+        color: var(--text-color) !important;
+        border: 1px solid #333 !important;
+    }
+
+    /* Botões */
+    .stButton > button {
+        background-color: #333 !important;
+        color: var(--text-color) !important;
+        border-radius: 8px;
+    }
 }
+
+/* TEMA CLARO */
 @media (prefers-color-scheme: light) {
     :root {
         --bg-color: #ffffff;
         --text-color: #000000;
+        --sidebar-bg: #f0f2f6;
+        --input-bg: #ffffff;
         --card-pendente: #FDECEA;
         --card-tratado: #E8F5E9;
     }
-}
 
-/* Aplica as cores */
-body, .stApp {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-}
+    body, .stApp {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+    }
 
-div[data-testid="stSidebar"] {
-    background-color: var(--bg-color) !important;
-}
-
-h1, h2, h3, h4, h5, h6, p, label, span {
-    color: var(--text-color) !important;
+    div[data-testid="stSidebar"] {
+        background-color: var(--sidebar-bg) !important;
+        color: var(--text-color) !important;
+    }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -160,7 +192,6 @@ for _, row in dados_exibir.iterrows():
     datahora = row.get("Carimbo de data/hora", "")
     tratativa_atual = row.get("Tratativa Comercial", "")
 
-    # Cores adaptadas ao tema
     cor_var = "var(--card-pendente)" if tratativa_atual == "" else "var(--card-tratado)"
 
     with st.container():
